@@ -4,6 +4,8 @@
 
 services:
   # Ghost Blog Service / Ghost Blog Servisi
+  # Uses fixed version for stability - change to ghost:alpine for auto-updates
+  # Kararlılık için sabit versiyon kullanır - otomatik güncellemeler için ghost:alpine yapın
   ghost-dev:
     image: ghost:5-alpine
     container_name: ghost-dev

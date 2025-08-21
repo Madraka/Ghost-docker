@@ -177,6 +177,113 @@ Bu portların kullanılmadığından emin olun.
 3. **MySQL root parolasını güvenli tutun**
 4. **Firewall kurallarını ayarlayın**
 5. **Düzenli backup alın**
+6. **Ghost'u düzenli güncelleyin (aşağıdaki Güncelleme bölümüne bakın)**
+
+## Ghost Güncellemeleri ve Veri Güvenliği
+
+### 🔄 Güncelleme Stratejisi
+
+**Mevcut Kurulum: Manuel Güncellemeler (Production için Önerilen)**
+
+Bu kurulum sabit Ghost versiyonu (`ghost:5-alpine`) kullanır, bu da şu anlama gelir:
+- ✅ **Otomatik güncelleme yok** - Siteniz beklenmedik şekilde bozulmaz
+- ✅ **Veri güvenliği** - İçeriğiniz ve ayarlarınız korunur
+- ✅ **Öngörülebilir davranış** - Siz manuel güncelleme yapana kadar aynı versiyon
+- ✅ **Test fırsatı** - Güncellemeleri önce development'ta test edebilirsiniz
+
+### 📊 Veri Kalıcılığı
+
+Güncellemeler sırasında verileriniz güvende çünkü:
+- **İçerik Docker volume'larında** - Container yeniden oluşturulsa bile kalır
+- **Veritabanı ayrı container'da** - Ghost güncellemelerinden bağımsız
+- **Temalar ve yüklemeler korunur** - Kalıcı volume'larda saklanır
+
+### 🚀 Ghost Nasıl Güncellenir
+
+#### Development Ortamı
+```bash
+# 1. İçeriğinizi yedekleyin (isteğe bağlı ama önerilen)
+docker-compose -f docker-compose.dev.yml exec mysql mysqldump -u ghost -p ghost_dev > backup_dev.sql
+
+# 2. En son Ghost image'ını çekin
+docker pull ghost:5-alpine
+
+# 3. Container'ları yeni image ile yeniden oluşturun
+docker-compose -f docker-compose.dev.yml down
+docker-compose -f docker-compose.dev.yml up -d
+
+# 4. Her şeyin çalıştığını kontrol edin
+docker-compose -f docker-compose.dev.yml logs -f ghost-dev
+```
+
+#### Production Ortamı
+```bash
+# 1. HER ZAMAN önce yedek alın
+docker-compose -f docker-compose.prod.yml exec mysql mysqldump -u ghost -p ghost_production > backup_$(date +%Y%m%d_%H%M%S).sql
+
+# 2. Güncellemeyi önce development'ta test edin
+# (Yukarıdaki development komutlarını kullanın)
+
+# 3. Production'ı güncelleyin
+docker pull ghost:5-alpine
+docker-compose -f docker-compose.prod.yml down
+docker-compose -f docker-compose.prod.yml up -d
+
+# 4. Her şeyin çalıştığını doğrulayın
+docker-compose -f docker-compose.prod.yml logs -f ghost
+```
+
+### 🔄 Otomatik Güncelleme Seçeneği (İleri Seviye)
+
+Otomatik güncellemeler istiyorsanız (production'da dikkatli kullanın):
+
+**Development İçin:**
+```yaml
+# docker-compose.dev.yml'de değiştirin:
+image: ghost:5-alpine
+# Şuna:
+image: ghost:alpine  # Her zaman en son
+```
+
+**Production İçin Watchtower ile:**
+```yaml
+# docker-compose.prod.yml'ye ekleyin
+services:
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 86400 --cleanup  # Günlük kontrol
+    restart: unless-stopped
+```
+
+### 📋 Güncelleme Kontrol Listesi
+
+- [ ] Veritabanını yedekle
+- [ ] Development'ta test et
+- [ ] Ghost sürüm notlarını kontrol et
+- [ ] Production'da güncelle
+- [ ] Admin panelin çalıştığını doğrula
+- [ ] Tema fonksiyonalitesini test et
+- [ ] E-posta gönderimini kontrol et
+- [ ] 24 saat izle
+
+### 🛡️ Geri Alma Stratejisi
+
+Bir şeyler ters giderse:
+```bash
+# 1. Mevcut container'ları durdur
+docker-compose down
+
+# 2. Belirli eski versiyonu kullan
+# Image'ı şuna değiştir: ghost:5.xx.x-alpine (belirli versiyon)
+
+# 3. Gerekirse veritabanını geri yükle
+docker-compose exec -i mysql mysql -u ghost -p ghost_production < backup.sql
+
+# 4. Container'ları başlat
+docker-compose up -d
+```
 
 ## Destek
 

@@ -200,7 +200,113 @@ docker-compose exec ghost chown -R node:node /var/lib/ghost/content
 3. **Keep MySQL root password secure**
 4. **Configure firewall rules**
 5. **Take regular backups**
-6. **Update Ghost regularly**
+6. **Update Ghost regularly (see Update section below)**
+
+## Ghost Updates & Data Safety
+
+### 🔄 Update Strategy
+
+**Current Setup: Manual Updates (Recommended for Production)**
+
+This setup uses fixed Ghost version (`ghost:5-alpine`) which means:
+- ✅ **No automatic updates** - Your site won't break unexpectedly
+- ✅ **Data safety** - Your content and settings are preserved
+- ✅ **Predictable behavior** - Same version until you manually update
+- ✅ **Testing opportunity** - You can test updates in development first
+
+### 📊 Data Persistence
+
+Your data is safe during updates because:
+- **Content stored in Docker volumes** - Survives container recreation
+- **Database in separate container** - Independent of Ghost updates
+- **Themes and uploads preserved** - Stored in persistent volumes
+
+### 🚀 How to Update Ghost
+
+#### Development Environment
+```bash
+# 1. Backup your content (optional but recommended)
+docker-compose -f docker-compose.dev.yml exec mysql mysqldump -u ghost -p ghost_dev > backup_dev.sql
+
+# 2. Pull latest Ghost image
+docker pull ghost:5-alpine
+
+# 3. Recreate containers with new image
+docker-compose -f docker-compose.dev.yml down
+docker-compose -f docker-compose.dev.yml up -d
+
+# 4. Check everything works
+docker-compose -f docker-compose.dev.yml logs -f ghost-dev
+```
+
+#### Production Environment
+```bash
+# 1. ALWAYS backup first
+docker-compose -f docker-compose.prod.yml exec mysql mysqldump -u ghost -p ghost_production > backup_$(date +%Y%m%d_%H%M%S).sql
+
+# 2. Test the update in development first
+# (Use development commands above)
+
+# 3. Update production
+docker pull ghost:5-alpine
+docker-compose -f docker-compose.prod.yml down
+docker-compose -f docker-compose.prod.yml up -d
+
+# 4. Verify everything works
+docker-compose -f docker-compose.prod.yml logs -f ghost
+```
+
+### 🔄 Auto-Update Option (Advanced)
+
+If you want automatic updates (use with caution in production):
+
+**For Development:**
+```yaml
+# In docker-compose.dev.yml, change:
+image: ghost:5-alpine
+# To:
+image: ghost:alpine  # Always latest
+```
+
+**For Production with Watchtower:**
+```yaml
+# Add to docker-compose.prod.yml
+services:
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 86400 --cleanup  # Check daily
+    restart: unless-stopped
+```
+
+### 📋 Update Checklist
+
+- [ ] Backup database
+- [ ] Test in development
+- [ ] Check Ghost release notes
+- [ ] Update in production
+- [ ] Verify admin panel works
+- [ ] Test theme functionality
+- [ ] Check email sending
+- [ ] Monitor for 24 hours
+
+### 🛡️ Rollback Strategy
+
+If something goes wrong:
+```bash
+# 1. Stop current containers
+docker-compose down
+
+# 2. Use specific older version
+# Change image to: ghost:5.xx.x-alpine (specific version)
+
+# 3. Restore database if needed
+docker-compose exec -i mysql mysql -u ghost -p ghost_production < backup.sql
+
+# 4. Start containers
+docker-compose up -d
+```
 
 ## Performance Optimization
 
