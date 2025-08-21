@@ -1,0 +1,41 @@
+{
+  "url": "https://your-domain.com",
+  "server": {
+    "port": 2368,
+    "host": "0.0.0.0"
+  },
+  "database": {
+    "client": "mysql",
+    "connection": {
+      "host": "mysql",
+      "user": "ghost",
+      "password": "your-db-password",
+      "database": "ghost_production"
+    }
+  },
+  "mail": {
+    "transport": "SMTP",
+    "options": {
+      "service": "Gmail",
+      "auth": {
+        "user": "your-email@gmail.com",
+        "pass": "your-app-password"
+      }
+    },
+    "from": "your-email@gmail.com"
+  },
+  "logging": {
+    "transports": [
+      "file",
+      "stdout"
+    ],
+    "level": "info"
+  },
+  "process": "systemd",
+  "paths": {
+    "contentPath": "/var/lib/ghost/content"
+  },
+  "privacy": {
+    "useUpdateCheck": false
+  }
+}

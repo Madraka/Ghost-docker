@@ -1,0 +1,31 @@
+# Docker
+.env
+*.log
+
+# Ghost
+/content/
+/logs/
+.ghost-cli
+
+# MySQL
+mysql-data/
+
+# SSL
+nginx/ssl/*.pem
+nginx/ssl/*.key
+nginx/ssl/*.crt
+
+# Backup files
+*.sql
+backup_*
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.temp
