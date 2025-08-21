@@ -1,78 +1,29 @@
-# Multi-stage Dockerfile for Ghost
-FROM node:18-alpine AS base
+# Ghost Dockerfile
+FROM ghost:5-alpine
 
-# Install system dependencies
-RUN apk add --no-cache \
-    bash \
-    curl \
-    git \
-    python3 \
-    make \
-    g++ \
-    vips-dev
-
-# Set working directory
-WORKDIR /var/lib/ghost
-
-# Install Ghost CLI globally
-RUN npm install -g ghost-cli@latest
-
-# Development stage
-FROM base AS development
-
-# Set environment
+# Set environment variables
 ENV NODE_ENV=development
-ENV GHOST_INSTALL=/var/lib/ghost
-ENV GHOST_CONTENT=/var/lib/ghost/content
+ENV database__client=mysql
+ENV database__connection__host=mysql-dev
+ENV database__connection__user=ghost
+ENV database__connection__password=ghostpassword
+ENV database__connection__database=ghost_dev
+ENV url=http://localhost:2368
 
-# Create ghost user
-RUN addgroup -g 1000 ghost && \
-    adduser -D -s /bin/bash -u 1000 -G ghost ghost
-
-# Create necessary directories
+# Create custom content directory
+USER root
 RUN mkdir -p /var/lib/ghost/content && \
-    chown -R ghost:ghost /var/lib/ghost
+    chown -R node:node /var/lib/ghost/content
 
-# Switch to ghost user
-USER ghost
-
-# Expose port
-EXPOSE 2368
-
-# Start command for development
-CMD ["ghost", "run"]
-
-# Production stage
-FROM base AS production
-
-# Set environment for production
-ENV NODE_ENV=production
-ENV GHOST_INSTALL=/var/lib/ghost
-ENV GHOST_CONTENT=/var/lib/ghost/content
-
-# Create ghost user
-RUN addgroup -g 1000 ghost && \
-    adduser -D -s /bin/bash -u 1000 -G ghost ghost
-
-# Create necessary directories
-RUN mkdir -p /var/lib/ghost/content && \
-    chown -R ghost:ghost /var/lib/ghost
-
-# Switch to ghost user
-USER ghost
-
-# Install Ghost
-RUN ghost install local --no-prompt --no-start
-
-# Copy custom configuration if exists
-COPY --chown=ghost:ghost config.production.json /var/lib/ghost/
+# Switch back to node user
+USER node
 
 # Expose port
 EXPOSE 2368
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:2368/ || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:2368/ || exit 1
 
-# Start command for production
-CMD ["ghost", "start"]
+# Start Ghost
+CMD ["node", "current/index.js"]

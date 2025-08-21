@@ -1,10 +1,6 @@
-version: '3.8'
-
 services:
   ghost-dev:
-    build:
-      context: .
-      target: development
+    image: ghost:5-alpine
     container_name: ghost-dev
     ports:
       - "2368:2368"
