@@ -1,19 +1,21 @@
 #!/bin/bash
 
 # Ghost Docker Setup Script
+# Ghost Docker Kurulum Scripti
+# This script helps to quickly set up Ghost environment
 # Bu script Ghost ortamını hızlıca kurmak için kullanılır
 
 set -e
 
-echo "🚀 Ghost Docker Setup Başlıyor..."
+echo "🚀 Ghost Docker Setup Starting... / Ghost Docker Kurulumu Başlıyor..."
 
-# Renk kodları
+# Color codes / Renk kodları
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+NC='\033[0m' # No Color / Renksiz
 
-# Fonksiyonlar
+# Functions / Fonksiyonlar
 print_success() {
     echo -e "${GREEN}✅ $1${NC}"
 }
@@ -26,24 +28,24 @@ print_error() {
     echo -e "${RED}❌ $1${NC}"
 }
 
-# Docker kontrolü
+# Docker check / Docker kontrolü
 if ! command -v docker &> /dev/null; then
-    print_error "Docker bulunamadı. Lütfen Docker'ı yükleyin."
+    print_error "Docker not found. Please install Docker. / Docker bulunamadı. Lütfen Docker'ı yükleyin."
     exit 1
 fi
 
 if ! command -v docker-compose &> /dev/null; then
-    print_error "Docker Compose bulunamadı. Lütfen Docker Compose'u yükleyin."
+    print_error "Docker Compose not found. Please install Docker Compose. / Docker Compose bulunamadı. Lütfen Docker Compose'u yükleyin."
     exit 1
 fi
 
-print_success "Docker ve Docker Compose bulundu"
+print_success "Docker and Docker Compose found / Docker ve Docker Compose bulundu"
 
-# Ortam seçimi
-echo "Hangi ortamı kurmak istiyorsunuz?"
-echo "1) Development (Yerel geliştirme)"
-echo "2) Production (Canlı ortam)"
-read -p "Seçiminizi yapın (1-2): " choice
+# Environment selection / Ortam seçimi
+echo "Which environment would you like to set up? / Hangi ortamı kurmak istiyorsunuz?"
+echo "1) Development (Local development / Yerel geliştirme)"
+echo "2) Production (Live environment / Canlı ortam)"
+read -p "Make your choice (1-2) / Seçiminizi yapın (1-2): " choice
 
 case $choice in
     1)

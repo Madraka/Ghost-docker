@@ -1,164 +1,257 @@
 # Ghost Docker Setup
 
-Bu proje Ghost blog platformunu Docker ile local development ve production ortamında çalıştırmak için gerekli tüm dosyaları içerir.
+🇬🇧 English README | [🇹🇷 Türkçe README](README.tr.md)
 
-## Özellikler
+[![GitHub Stars](https://img.shields.io/github/stars/Madraka/Ghost-docker?style=social)](https://github.com/Madraka/Ghost-docker/stargazers)
+[![GitHub Forks](https://img.shields.io/github/forks/Madraka/Ghost-docker?style=social)](https://github.com/Madraka/Ghost-docker/network/members)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://www.docker.com/)
+[![Ghost](https://img.shields.io/badge/Ghost-5.x-green.svg)](https://ghost.org/)
 
-- 🐳 Multi-stage Dockerfile (development ve production)
-- 🗄️ MySQL veritabanı entegrasyonu
-- 🔒 Nginx reverse proxy ile SSL desteği
-- 📧 E-posta konfigürasyonu
-- 🔧 Development ve production ortamları için ayrı konfigürasyonlar
-- 📊 Adminer ile veritabanı yönetimi (development)
-- 🚀 Production-ready konfigürasyon
+This project contains all necessary files to run Ghost blog platform with Docker in both local development and production environments.
 
-## Hızlı Başlangıç
+## Features
 
-### Development Ortamı
+- 🐳 Official Ghost Docker image (Alpine-based)
+- 🗄️ MySQL database integration
+- 🔒 Nginx reverse proxy with SSL support
+- 📧 Email configuration support
+- 🔧 Separate configurations for development and production
+- 📊 Adminer for database management (development)
+- 🚀 Production-ready configuration
+- 🛡️ Security headers and rate limiting
 
-1. **Projeyi klonlayın ve dizine girin:**
+## Quick Start
+
+### Development Environment
+
+1. **Clone the project and navigate to directory:**
    ```bash
-   cd /Users/madraka/Desktop/de.listiy.com
+   git clone https://github.com/Madraka/Ghost-docker.git
+   cd Ghost-docker
    ```
 
-2. **Development ortamını başlatın:**
+2. **Start development environment:**
    ```bash
    docker-compose -f docker-compose.dev.yml up -d
    ```
 
-3. **Ghost'a erişin:**
+3. **Access Ghost:**
    - Blog: http://localhost:2368
    - Admin Panel: http://localhost:2368/ghost
    - Adminer (DB): http://localhost:8080
 
-### Production Ortamı
+### Auto Setup (Recommended)
 
-1. **Environment dosyasını oluşturun:**
+For an automated setup process, you can use the included setup script:
+
+```bash
+git clone https://github.com/Madraka/Ghost-docker.git
+cd Ghost-docker
+chmod +x setup.sh
+./setup.sh
+```
+
+The script will guide you through the setup process for both development and production environments.
+
+### Production Environment
+
+1. **Create environment file:**
    ```bash
    cp .env.example .env
    ```
 
-2. **`.env` dosyasını düzenleyin:**
-   - Güçlü parolalar ayarlayın
-   - Domain adınızı girin
-   - E-posta ayarlarını yapılandırın
+2. **Edit `.env` file:**
+   - Set strong passwords
+   - Configure your domain name
+   - Set up email settings
 
-3. **SSL sertifikalarını oluşturun:**
+3. **Create SSL certificates:**
    ```bash
    mkdir -p nginx/ssl
-   # SSL sertifikalarınızı nginx/ssl/ dizinine koyun
-   # cert.pem ve key.pem dosyaları gerekli
+   # Place your SSL certificates in nginx/ssl/ directory
+   # Required files: cert.pem and key.pem
    ```
 
-4. **Production konfigürasyonunu güncelleyin:**
-   - `config.production.json` dosyasında domain ve e-posta ayarlarını güncelleyin
-   - `nginx/nginx.conf` dosyasında domain adını güncelleyin
+4. **Update production configuration:**
+   - Update domain and email settings in `config.production.json`
+   - Update domain name in `nginx/nginx.conf`
 
-5. **Production ortamını başlatın:**
+5. **Start production environment:**
    ```bash
    docker-compose -f docker-compose.prod.yml up -d
    ```
 
-## Dosya Yapısı
+## File Structure
 
 ```
 .
-├── Dockerfile                   # Multi-stage Docker image
-├── docker-compose.dev.yml      # Development ortamı
-├── docker-compose.prod.yml     # Production ortamı
-├── config.development.json     # Development konfigürasyonu
-├── config.production.json      # Production konfigürasyonu
-├── .env.example                # Environment değişkenleri örneği
+├── Dockerfile                   # Custom Docker image (optional)
+├── docker-compose.dev.yml      # Development environment
+├── docker-compose.prod.yml     # Production environment
+├── config.development.json     # Development configuration
+├── config.production.json      # Production configuration
+├── .env.example                # Environment variables template
 ├── nginx/
-│   └── nginx.conf              # Nginx konfigürasyonu
+│   └── nginx.conf              # Nginx configuration
 ├── mysql/
-│   └── my.cnf                  # MySQL konfigürasyonu
-└── README.md
+│   └── my.cnf                  # MySQL configuration
+├── setup.sh                   # Automated setup script
+├── README.md                   # English documentation
+└── README.tr.md               # Turkish documentation
 ```
 
-## Komutlar
+## Commands
 
 ### Development
 
 ```bash
-# Ortamı başlat
+# Start environment
 docker-compose -f docker-compose.dev.yml up -d
 
-# Logları izle
+# Follow logs
 docker-compose -f docker-compose.dev.yml logs -f ghost-dev
 
-# Ortamı durdur
+# Stop environment
 docker-compose -f docker-compose.dev.yml down
 
-# Volumes ile birlikte temizle
+# Clean up with volumes
 docker-compose -f docker-compose.dev.yml down -v
 ```
 
 ### Production
 
 ```bash
-# Ortamı başlat
+# Start environment
 docker-compose -f docker-compose.prod.yml up -d
 
-# Logları izle
+# Follow logs
 docker-compose -f docker-compose.prod.yml logs -f ghost
 
-# Ortamı durdur
+# Stop environment
 docker-compose -f docker-compose.prod.yml down
 
-# Backup alma
+# Create backup
 docker-compose -f docker-compose.prod.yml exec mysql mysqldump -u ghost -p ghost_production > backup.sql
 ```
 
-## SSL Sertifikası
+## SSL Certificate Setup
 
-Production ortamı için SSL sertifikası gereklidir. Let's Encrypt kullanabilirsiniz:
+Production environment requires SSL certificates. You can use Let's Encrypt:
 
 ```bash
-# Certbot ile SSL sertifikası alma (sunucuda)
+# Get SSL certificate using Certbot (on server)
 sudo certbot certonly --standalone -d your-domain.com
 sudo cp /etc/letsencrypt/live/your-domain.com/fullchain.pem nginx/ssl/cert.pem
 sudo cp /etc/letsencrypt/live/your-domain.com/privkey.pem nginx/ssl/key.pem
 ```
 
-## Veritabanı Yedekleme
+## Database Backup
 
 ```bash
-# Backup alma
+# Create backup
 docker-compose -f docker-compose.prod.yml exec mysql mysqldump -u ghost -p ghost_production > backup_$(date +%Y%m%d_%H%M%S).sql
 
-# Backup geri yükleme
+# Restore backup
 docker-compose -f docker-compose.prod.yml exec -i mysql mysql -u ghost -p ghost_production < backup.sql
 ```
 
+## Environment Variables
+
+Required environment variables for production (`.env` file):
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `DB_ROOT_PASSWORD` | MySQL root password | `your-strong-root-password` |
+| `DB_PASSWORD` | Ghost database password | `your-strong-ghost-password` |
+| `GHOST_URL` | Your domain URL | `https://your-domain.com` |
+| `MAIL_SERVICE` | Email service provider | `Gmail` |
+| `MAIL_USER` | Email username | `your-email@gmail.com` |
+| `MAIL_PASSWORD` | Email password/app password | `your-app-password` |
+| `MAIL_FROM` | From email address | `your-email@gmail.com` |
+
 ## Troubleshooting
 
-### Ghost bağlanamıyor
+### Ghost can't connect to database
 ```bash
-# Container loglarını kontrol edin
+# Check container logs
 docker-compose logs ghost
 
-# MySQL bağlantısını test edin
+# Test MySQL connection
 docker-compose exec mysql mysql -u ghost -p ghost_production
 ```
 
-### Port çakışması
-- Development: Port 2368, 3306, 8080
-- Production: Port 2368, 80, 443
+### Port conflicts
+- Development: Ports 2368, 3306, 8080
+- Production: Ports 2368, 80, 443
 
-Bu portların kullanılmadığından emin olun.
+Make sure these ports are not in use by other services.
 
-## Güvenlik Notları
+### Permission issues
+```bash
+# Fix content directory permissions
+docker-compose exec ghost chown -R node:node /var/lib/ghost/content
+```
 
-1. **Production'da güçlü parolalar kullanın**
-2. **SSL sertifikalarını düzenli olarak yenileyin**
-3. **MySQL root parolasını güvenli tutun**
-4. **Firewall kurallarını ayarlayın**
-5. **Düzenli backup alın**
+## Security Notes
 
-## Destek
+1. **Use strong passwords in production**
+2. **Regularly renew SSL certificates**
+3. **Keep MySQL root password secure**
+4. **Configure firewall rules**
+5. **Take regular backups**
+6. **Update Ghost regularly**
 
-Herhangi bir sorun yaşarsanız:
-1. Container loglarını kontrol edin
-2. Port kullanımını kontrol edin
-3. Konfigürasyon dosyalarını gözden geçirin
+## Performance Optimization
+
+### MySQL Tuning
+The included `mysql/my.cnf` file contains optimized settings for Ghost:
+- Increased buffer pool size
+- Optimized log file size
+- UTF8MB4 character set for emoji support
+
+### Nginx Optimization
+- Gzip compression enabled
+- Static file caching
+- Rate limiting configured
+- Security headers included
+
+## Development Workflow
+
+1. **Make changes to Ghost themes or content**
+2. **Test in development environment**
+3. **Create backup of production data**
+4. **Deploy to production environment**
+5. **Monitor logs for any issues**
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test both development and production environments
+5. Submit a pull request
+
+## License
+
+This project is open source and available under the [MIT License](LICENSE).
+
+## Support
+
+If you encounter any issues:
+1. Check container logs
+2. Verify port usage
+3. Review configuration files
+4. Check the troubleshooting section
+5. Open an issue on GitHub
+
+## Acknowledgments
+
+- [Ghost](https://ghost.org/) - The publication platform
+- [Docker](https://docker.com/) - Containerization platform
+- [Nginx](https://nginx.org/) - Web server and reverse proxy
+- [MySQL](https://mysql.com/) - Database system
+
+---
+
+**Made with ❤️ for the Ghost community**

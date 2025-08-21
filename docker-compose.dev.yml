@@ -1,4 +1,9 @@
+# Ghost Development Environment
+# Bu dosya Ghost'un development ortamında çalışması için gerekli servisleri tanımlar
+# This file defines services needed to run Ghost in development environment
+
 services:
+  # Ghost Blog Service / Ghost Blog Servisi
   ghost-dev:
     image: ghost:5-alpine
     container_name: ghost-dev
@@ -22,6 +27,7 @@ services:
       - ghost-network
     restart: unless-stopped
 
+  # MySQL Database Service / MySQL Veritabanı Servisi
   mysql-dev:
     image: mysql:8.0
     container_name: mysql-dev
@@ -42,6 +48,7 @@ services:
       retries: 10
     restart: unless-stopped
 
+  # Database Administration Tool / Veritabanı Yönetim Aracı
   adminer:
     image: adminer
     container_name: adminer-dev
@@ -51,10 +58,12 @@ services:
       - ghost-network
     restart: unless-stopped
 
+# Persistent Storage / Kalıcı Depolama
 volumes:
   ghost_content_dev:
   mysql_data_dev:
 
+# Network Configuration / Ağ Konfigürasyonu
 networks:
   ghost-network:
     driver: bridge

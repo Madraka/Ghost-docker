@@ -1,4 +1,9 @@
+# Ghost Production Environment
+# Bu dosya Ghost'un production ortamında çalışması için gerekli servisleri tanımlar
+# This file defines services needed to run Ghost in production environment
+
 services:
+  # Ghost Blog Service / Ghost Blog Servisi
   ghost:
     image: ghost:5-alpine
     container_name: ghost-prod
@@ -33,6 +38,7 @@ services:
         reservations:
           memory: 256M
 
+  # MySQL Database Service / MySQL Veritabanı Servisi
   mysql:
     image: mysql:8.0
     container_name: mysql-prod
@@ -58,6 +64,7 @@ services:
         reservations:
           memory: 512M
 
+  # Nginx Reverse Proxy / Nginx Ters Proxy
   nginx:
     image: nginx:alpine
     container_name: nginx-prod
@@ -74,10 +81,12 @@ services:
       - ghost-network
     restart: unless-stopped
 
+# Persistent Storage / Kalıcı Depolama
 volumes:
   ghost_content:
   mysql_data:
 
+# Network Configuration / Ağ Konfigürasyonu
 networks:
   ghost-network:
     driver: bridge

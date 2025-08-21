@@ -1,10 +1,12 @@
 {
+  "_comment": "Ghost Development Configuration / Ghost Geliştirme Konfigürasyonu",
   "url": "http://localhost:2368",
   "server": {
     "port": 2368,
     "host": "0.0.0.0"
   },
   "database": {
+    "_comment": "MySQL database configuration / MySQL veritabanı konfigürasyonu",
     "client": "mysql",
     "connection": {
       "host": "mysql-dev",
@@ -14,9 +16,11 @@
     }
   },
   "mail": {
+    "_comment": "Development mail configuration / Geliştirme e-posta konfigürasyonu",
     "transport": "Direct"
   },
   "logging": {
+    "_comment": "Logging configuration / Log konfigürasyonu",
     "transports": [
       "file",
       "stdout"

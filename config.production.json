@@ -1,10 +1,13 @@
 {
+  "_comment": "Ghost Production Configuration / Ghost Production Konfigürasyonu",
+  "_warning": "Update domain and email settings before production use / Production kullanımından önce domain ve e-posta ayarlarını güncelleyin",
   "url": "https://your-domain.com",
   "server": {
     "port": 2368,
     "host": "0.0.0.0"
   },
   "database": {
+    "_comment": "MySQL database configuration / MySQL veritabanı konfigürasyonu",
     "client": "mysql",
     "connection": {
       "host": "mysql",
@@ -14,6 +17,7 @@
     }
   },
   "mail": {
+    "_comment": "SMTP email configuration / SMTP e-posta konfigürasyonu",
     "transport": "SMTP",
     "options": {
       "service": "Gmail",
@@ -25,6 +29,7 @@
     "from": "your-email@gmail.com"
   },
   "logging": {
+    "_comment": "Production logging settings / Production log ayarları",
     "transports": [
       "file",
       "stdout"
@@ -36,6 +41,7 @@
     "contentPath": "/var/lib/ghost/content"
   },
   "privacy": {
+    "_comment": "Disable update checks for privacy / Gizlilik için güncelleme kontrollerini devre dışı bırak",
     "useUpdateCheck": false
   }
 }
