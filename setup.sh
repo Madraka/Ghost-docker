@@ -47,71 +47,126 @@ echo "1) Development (Local development / Yerel geliştirme)"
 echo "2) Production (Live environment / Canlı ortam)"
 read -p "Make your choice (1-2) / Seçiminizi yapın (1-2): " choice
 
+# Proxy selection for production / Production için proxy seçimi
+if [ "$choice" = "2" ]; then
+    echo ""
+    echo "Which reverse proxy would you like to use? / Hangi reverse proxy kullanmak istiyorsunuz?"
+    echo "1) None (Direct access / Doğrudan erişim)"
+    echo "2) Nginx (Manual configuration / Manuel konfigürasyon)"
+    echo "3) Nginx Proxy Manager (GUI-based / GUI tabanlı)"
+    echo "4) Traefik (Automatic HTTPS / Otomatik HTTPS)"
+    echo "5) Cloudflare Tunnel (Cloud-based / Bulut tabanlı)"
+    echo "6) Caddy (Automatic HTTPS / Otomatik HTTPS)"
+    read -p "Make your choice (1-6) / Seçiminizi yapın (1-6): " proxy_choice
+fi
+
 case $choice in
     1)
-        echo "🔧 Development ortamı kuruluyor..."
+        echo "🔧 Development environment starting... / Development ortamı kuruluyor..."
         
-        # Development ortamını başlat
+        # Start development environment / Development ortamını başlat
         docker-compose -f docker-compose.dev.yml up -d
         
-        echo "⏳ Ghost'un başlamasını bekleniyor..."
+        echo "⏳ Waiting for Ghost to start... / Ghost'un başlamasını bekleniyor..."
         sleep 30
         
-        print_success "Development ortamı hazır!"
+        print_success "Development environment ready! / Development ortamı hazır!"
         echo "📝 Blog: http://localhost:2368"
         echo "🔧 Admin: http://localhost:2368/ghost"
         echo "🗄️  Adminer: http://localhost:8080"
         echo ""
+        echo "Visit http://localhost:2368/ghost to create admin account"
         echo "Admin hesabı oluşturmak için http://localhost:2368/ghost adresine gidin"
         ;;
         
     2)
-        echo "🏭 Production ortamı kuruluyor..."
+        echo "🏭 Production environment starting... / Production ortamı kuruluyor..."
         
-        # .env dosyası kontrolü
-        if [ ! -f .env ]; then
-            print_warning ".env dosyası bulunamadı. Örnek dosyadan kopyalanıyor..."
-            cp .env.example .env
-            print_error "Lütfen .env dosyasını düzenleyin ve tekrar çalıştırın!"
-            echo "Özellikle şu değerleri ayarlayın:"
-            echo "- DB_ROOT_PASSWORD"
-            echo "- DB_PASSWORD" 
-            echo "- GHOST_URL"
-            echo "- Mail ayarları"
-            exit 1
-        fi
+        case $proxy_choice in
+            1)
+                echo "Setting up Ghost without proxy... / Proxy olmadan Ghost kuruluyor..."
+                # Use basic production setup / Temel production kurulumu kullan
+                docker-compose -f docker-compose.prod.yml up -d
+                print_success "Ghost is running on port 2368 / Ghost 2368 portunda çalışıyor"
+                echo "🌐 Access: http://your-server-ip:2368"
+                ;;
+            2)
+                echo "Setting up Ghost with Nginx... / Nginx ile Ghost kuruluyor..."
+                cd proxy-configs/nginx
+                if [ ! -f .env ]; then
+                    cp .env.example .env
+                    print_warning "Please edit proxy-configs/nginx/.env file / Lütfen proxy-configs/nginx/.env dosyasını düzenleyin"
+                fi
+                docker-compose -f docker-compose.nginx.yml up -d
+                cd ../..
+                print_success "Ghost with Nginx is ready! / Nginx ile Ghost hazır!"
+                echo "🌐 Access: https://your-domain.com"
+                ;;
+            3)
+                echo "Setting up Ghost with Nginx Proxy Manager... / Nginx Proxy Manager ile Ghost kuruluyor..."
+                cd proxy-configs/nginx-proxy-manager
+                if [ ! -f .env ]; then
+                    cp .env.example .env
+                    print_warning "Please edit proxy-configs/nginx-proxy-manager/.env file"
+                fi
+                docker-compose -f docker-compose.npm.yml up -d
+                cd ../..
+                print_success "Ghost with Nginx Proxy Manager is ready!"
+                echo "🌐 Proxy Manager: http://your-server-ip:81"
+                echo "📝 Blog: Configure in Proxy Manager GUI"
+                ;;
+            4)
+                echo "Setting up Ghost with Traefik... / Traefik ile Ghost kuruluyor..."
+                cd proxy-configs/traefik
+                if [ ! -f .env ]; then
+                    cp .env.example .env
+                    print_warning "Please edit proxy-configs/traefik/.env file"
+                fi
+                docker-compose -f docker-compose.traefik.yml up -d
+                cd ../..
+                print_success "Ghost with Traefik is ready!"
+                echo "🌐 Dashboard: http://your-server-ip:8080"
+                echo "📝 Blog: https://your-domain.com"
+                ;;
+            5)
+                echo "Setting up Ghost with Cloudflare Tunnel... / Cloudflare Tunnel ile Ghost kuruluyor..."
+                cd proxy-configs/cloudflare-tunnel
+                if [ ! -f .env ]; then
+                    cp .env.example .env
+                    print_warning "Please edit proxy-configs/cloudflare-tunnel/.env file with your tunnel token"
+                fi
+                docker-compose -f docker-compose.cloudflare.yml up -d
+                cd ../..
+                print_success "Ghost with Cloudflare Tunnel is ready!"
+                echo "🌐 Access: https://your-tunnel-domain.com"
+                ;;
+            6)
+                echo "Setting up Ghost with Caddy... / Caddy ile Ghost kuruluyor..."
+                cd proxy-configs/caddy
+                if [ ! -f .env ]; then
+                    cp .env.example .env
+                    print_warning "Please edit proxy-configs/caddy/.env file"
+                fi
+                docker-compose -f docker-compose.caddy.yml up -d
+                cd ../..
+                print_success "Ghost with Caddy is ready!"
+                echo "🌐 Access: https://your-domain.com"
+                ;;
+            *)
+                print_error "Invalid choice! / Geçersiz seçim!"
+                exit 1
+                ;;
+        esac
         
-        # SSL sertifikası kontrolü
-        if [ ! -f nginx/ssl/cert.pem ] || [ ! -f nginx/ssl/key.pem ]; then
-            print_error "SSL sertifikaları bulunamadı!"
-            echo "nginx/ssl/ dizinine cert.pem ve key.pem dosyalarını yerleştirin"
-            echo "Let's Encrypt kullanabilirsiniz:"
-            echo "certbot certonly --standalone -d your-domain.com"
-            exit 1
-        fi
-        
-        # Konfigürasyon dosyası kontrolü
-        if grep -q "your-domain.com" config.production.json; then
-            print_warning "config.production.json dosyasında 'your-domain.com' değiştirin"
-        fi
-        
-        if grep -q "your-domain.com" nginx/nginx.conf; then
-            print_warning "nginx/nginx.conf dosyasında 'your-domain.com' değiştirin"
-        fi
-        
-        # Production ortamını başlat
-        docker-compose -f docker-compose.prod.yml up -d
-        
-        echo "⏳ Ghost'un başlamasını bekleniyor..."
-        sleep 30
-        
-        print_success "Production ortamı hazır!"
-        echo "🌐 Site: https://your-domain.com"
-        echo "🔧 Admin: https://your-domain.com/ghost"
+        echo ""
+        echo "⚠️  Don't forget to: / Unutmayın:"
+        echo "1. Edit .env files / .env dosyalarını düzenleyin"
+        echo "2. Configure DNS records / DNS kayıtlarını yapılandırın"
+        echo "3. Set up SSL certificates (if needed) / SSL sertifikalarını ayarlayın (gerekirse)"
         ;;
         
     *)
-        print_error "Geçersiz seçim!"
+        print_error "Invalid choice! / Geçersiz seçim!"
         exit 1
         ;;
 esac

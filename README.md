@@ -28,9 +28,30 @@ This project contains all necessary files to run Ghost blog platform with Docker
 
 ## Quick Start
 
-### Development Environment
+### Automated Setup (Recommended)
 
-1. **Clone the project and navigate to directory:**
+The easiest way to get started is using our setup script which handles all configurations:
+
+```bash
+git clone https://github.com/Madraka/Ghost-docker.git
+cd Ghost-docker
+chmod +x setup.sh
+./setup.sh
+```
+
+The script will guide you through:
+- Environment selection (Development/Production)
+- Proxy selection (for production)
+- Automatic configuration
+- Container startup
+
+### Manual Setup
+
+#### Development (Local)
+
+For local development without proxy:
+
+1. **Clone and enter directory:**
    ```bash
    git clone https://github.com/Madraka/Ghost-docker.git
    cd Ghost-docker
@@ -46,18 +67,26 @@ This project contains all necessary files to run Ghost blog platform with Docker
    - Admin Panel: http://localhost:2368/ghost
    - Adminer (DB): http://localhost:8080
 
-### Auto Setup (Recommended)
+#### Production (With Proxy)
 
-For an automated setup process, you can use the included setup script:
+For production, choose one of the proxy configurations from `proxy-configs/` directory:
 
 ```bash
-git clone https://github.com/Madraka/Ghost-docker.git
-cd Ghost-docker
-chmod +x setup.sh
-./setup.sh
+# Example with Nginx Proxy Manager
+cd proxy-configs/nginx-proxy-manager
+cp .env.example .env
+# Edit .env with your settings
+nano .env
+docker-compose -f docker-compose.npm.yml up -d
 ```
 
-The script will guide you through the setup process for both development and production environments.
+#### Production (Without Proxy)
+
+⚠️ **Not recommended for public sites** - Use only for testing or internal networks:
+
+```bash
+docker-compose -f docker-compose.prod.yml up -d
+```
 
 ## Reverse Proxy Options
 

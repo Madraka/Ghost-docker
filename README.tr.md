@@ -28,9 +28,30 @@ Bu proje Ghost blog platformunu Docker ile local development ve production ortam
 
 ## Hızlı Başlangıç
 
-### Development Ortamı
+### Otomatik Kurulum (Önerilen)
 
-1. **Projeyi klonlayın ve dizine girin:**
+En kolay başlangıç yolu, tüm konfigürasyonları otomatik yapan setup scriptimizi kullanmaktır:
+
+```bash
+git clone https://github.com/Madraka/Ghost-docker.git
+cd Ghost-docker
+chmod +x setup.sh
+./setup.sh
+```
+
+Script size şunlarda rehberlik edecek:
+- Ortam seçimi (Development/Production)
+- Proxy seçimi (production için)
+- Otomatik konfigürasyon
+- Container başlatma
+
+### Manuel Kurulum
+
+#### Development (Yerel)
+
+Proxy olmadan yerel geliştirme için:
+
+1. **Repoyu klonlayın ve dizine girin:**
    ```bash
    git clone https://github.com/Madraka/Ghost-docker.git
    cd Ghost-docker
@@ -46,37 +67,26 @@ Bu proje Ghost blog platformunu Docker ile local development ve production ortam
    - Admin Panel: http://localhost:2368/ghost
    - Adminer (DB): http://localhost:8080
 
-### Otomatik Kurulum (Önerilen)
+#### Production (Proxy ile)
 
-Otomatik kurulum süreci için dahil edilen kurulum scriptini kullanabilirsiniz:
+Production için `proxy-configs/` dizininden proxy konfigürasyonlarından birini seçin:
 
 ```bash
-git clone https://github.com/Madraka/Ghost-docker.git
-cd Ghost-docker
-chmod +x setup.sh
-./setup.sh
+# Nginx Proxy Manager örneği
+cd proxy-configs/nginx-proxy-manager
+cp .env.example .env
+# .env dosyasını ayarlarınızla düzenleyin
+nano .env
+docker-compose -f docker-compose.npm.yml up -d
 ```
 
-Script hem development hem production ortamları için kurulum sürecinde size rehberlik edecektir.
+#### Production (Proxy olmadan)
 
-### Production Ortamı
+⚠️ **Herkese açık siteler için önerilmez** - Sadece test veya iç ağlar için kullanın:
 
-1. **Environment dosyasını oluşturun:**
-   ```bash
-   cp .env.example .env
-   ```
-
-2. **`.env` dosyasını düzenleyin:**
-   - Güçlü parolalar ayarlayın
-   - Domain adınızı girin
-   - E-posta ayarlarını yapılandırın
-
-3. **SSL sertifikalarını oluşturun:**
-   ```bash
-   mkdir -p nginx/ssl
-   # SSL sertifikalarınızı nginx/ssl/ dizinine koyun
-   # cert.pem ve key.pem dosyaları gerekli
-   ```
+```bash
+docker-compose -f docker-compose.prod.yml up -d
+```
 
 4. **Production konfigürasyonunu güncelleyin:**
    - `config.production.json` dosyasında domain ve e-posta ayarlarını güncelleyin

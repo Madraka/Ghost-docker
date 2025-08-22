@@ -1,6 +1,9 @@
-# Ghost Development Environment
-# Bu dosya Ghost'un development ortamında çalışması için gerekli servisleri tanımlar
-# This file defines services needed to run Ghost in development environment
+# Ghost Development Environment (No Proxy)
+# Ghost Development Ortamı (Proxy Yok)
+# This file defines services needed to run Ghost in development environment without proxy
+# Bu dosya Ghost'u development ortamında proxy olmadan çalıştırmak için gerekli servisleri tanımlar
+# For production with proxy options, see proxy-configs/ directory
+# Proxy seçenekleri ile production için proxy-configs/ dizinine bakın
 
 services:
   # Ghost Blog Service / Ghost Blog Servisi

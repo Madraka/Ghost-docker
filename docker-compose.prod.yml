@@ -1,6 +1,14 @@
-# Ghost Production Environment
-# Bu dosya Ghost'un production ortamında çalışması için gerekli servisleri tanımlar
-# This file defines services needed to run Ghost in production environment
+# Ghost Production Environment (No Proxy)
+# Ghost Production Ortamı (Proxy Yok)
+# This file defines services needed to run Ghost in production environment without proxy
+# Bu dosya Ghost'u production ortamında proxy olmadan çalıştırmak için gerekli servisleri tanımlar
+# For production with proxy options, see proxy-configs/ directory
+# Proxy seçenekleri ile production için proxy-configs/ dizinine bakın
+#
+# WARNING: This setup exposes Ghost directly on port 2368
+# UYARI: Bu kurulum Ghost'u doğrudan 2368 portunda açar
+# For security and SSL, use one of the proxy configurations
+# Güvenlik ve SSL için proxy konfigürasyonlarından birini kullanın
 
 services:
   # Ghost Blog Service / Ghost Blog Servisi
