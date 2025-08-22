@@ -1,0 +1,64 @@
+# Caddyfile - Caddy Configuration
+# Caddy Konfigürasyon Dosyası
+
+# Main site configuration / Ana site konfigürasyonu
+{$DOMAIN} {
+    # Reverse proxy to Ghost / Ghost'a ters proxy
+    reverse_proxy ghost:2368
+    
+    # Enable compression / Sıkıştırmayı etkinleştir
+    encode gzip
+    
+    # Security headers / Güvenlik başlıkları
+    header {
+        # Hide server information / Sunucu bilgilerini gizle
+        -Server
+        
+        # Security headers / Güvenlik başlıkları
+        X-Content-Type-Options "nosniff"
+        X-XSS-Protection "1; mode=block"
+        X-Frame-Options "SAMEORIGIN"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        X-Robots-Tag "noindex, nofollow, nosnippet, noarchive"
+        
+        # Remove X-Powered-By header / X-Powered-By başlığını kaldır
+        -X-Powered-By
+    }
+    
+    # Logging / Günlükleme
+    log {
+        output file /var/log/caddy/access.log
+        format json
+    }
+    
+    # Rate limiting for admin panel / Yönetim paneli için hız sınırlama
+    @admin {
+        path /ghost/*
+    }
+    rate_limit @admin {
+        zone admin
+        key {remote}
+        events 30
+        window 1m
+    }
+}
+
+# Admin subdomain (optional) / Yönetici alt domaini (isteğe bağlı)
+# admin.{$DOMAIN} {
+#     reverse_proxy ghost:2368
+#     
+#     # Additional security for admin / Yönetici için ek güvenlik
+#     basicauth {
+#         admin $2a$14$hashed_password_here
+#     }
+# }
+
+# Redirect www to non-www / www'yu www olmayan adrese yönlendir
+www.{$DOMAIN} {
+    redir https://{$DOMAIN}{uri} permanent
+}
+
+# API configuration for Caddy management / Caddy yönetimi için API konfigürasyonu
+:2019 {
+    metrics /metrics
+}

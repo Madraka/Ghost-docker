@@ -12,14 +12,19 @@ This project contains all necessary files to run Ghost blog platform with Docker
 
 ## Features
 
-- 🐳 Official Ghost Docker image (Alpine-based)
-- 🗄️ MySQL database integration
-- 🔒 Nginx reverse proxy with SSL support
-- 📧 Email configuration support
-- 🔧 Separate configurations for development and production
-- 📊 Adminer for database management (development)
-- 🚀 Production-ready configuration
-- 🛡️ Security headers and rate limiting
+- 🐳 **Official Ghost Docker image** (Alpine-based)
+- 🗄️ **MySQL database integration**
+- � **Multiple reverse proxy options:**
+  - 🔧 **Nginx** - Traditional setup with manual SSL
+  - 🎨 **Nginx Proxy Manager** - GUI-based management
+  - ⚡ **Traefik** - Modern cloud-native proxy
+  - ☁️ **Cloudflare Tunnel** - Zero-config secure tunnel
+  - 🚀 **Caddy** - Simple automatic HTTPS
+- 📧 **Email configuration support**
+- 🔧 **Separate configurations for development and production**
+- 📊 **Adminer for database management (development)**
+- 🛡️ **Security headers and rate limiting**
+- 🔄 **Easy migration between proxy solutions**
 
 ## Quick Start
 
@@ -53,6 +58,28 @@ chmod +x setup.sh
 ```
 
 The script will guide you through the setup process for both development and production environments.
+
+## Reverse Proxy Options
+
+This project includes multiple reverse proxy configurations to suit different needs:
+
+| Proxy | Difficulty | GUI | Auto SSL | Best For |
+|-------|------------|-----|----------|----------|
+| **Nginx** | Medium | ❌ | ❌ | Traditional setups, full control |
+| **Nginx Proxy Manager** | Easy | ✅ | ✅ | Beginners, GUI lovers |
+| **Traefik** | Medium | ✅ | ✅ | Container orchestration |
+| **Cloudflare Tunnel** | Easy | ✅ | ✅ | Zero-config, maximum security |
+| **Caddy** | Easy | ❌ | ✅ | Simple config, modern features |
+
+### Quick Recommendations
+
+- **Beginners:** Nginx Proxy Manager or Cloudflare Tunnel
+- **Advanced Users:** Nginx or Traefik  
+- **Maximum Security:** Cloudflare Tunnel
+- **Simplest Config:** Caddy
+- **Enterprise:** Nginx or Traefik
+
+For detailed setup instructions, see [`proxy-configs/README.md`](proxy-configs/README.md)
 
 ### Production Environment
 
@@ -88,14 +115,21 @@ The script will guide you through the setup process for both development and pro
 .
 ├── Dockerfile                   # Custom Docker image (optional)
 ├── docker-compose.dev.yml      # Development environment
-├── docker-compose.prod.yml     # Production environment
+├── docker-compose.prod.yml     # Production environment (basic)
 ├── config.development.json     # Development configuration
 ├── config.production.json      # Production configuration
 ├── .env.example                # Environment variables template
-├── nginx/
+├── nginx/                      # Basic Nginx configuration
 │   └── nginx.conf              # Nginx configuration
-├── mysql/
+├── mysql/                      # MySQL optimization
 │   └── my.cnf                  # MySQL configuration
+├── proxy-configs/              # 🔄 Multiple reverse proxy options
+│   ├── nginx/                  # Traditional Nginx setup
+│   ├── nginx-proxy-manager/    # GUI-based proxy management
+│   ├── traefik/                # Modern cloud-native proxy
+│   ├── cloudflare-tunnel/      # Zero-config secure tunnel
+│   ├── caddy/                  # Simple automatic HTTPS
+│   └── README.md               # Proxy comparison guide
 ├── setup.sh                   # Automated setup script
 ├── README.md                   # English documentation
 └── README.tr.md               # Turkish documentation

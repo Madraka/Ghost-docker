@@ -1,0 +1,19 @@
+# Optional: Cloudflare Tunnel Configuration File
+# İsteğe bağlı: Cloudflare Tunnel Konfigürasyon Dosyası
+
+tunnel: your-tunnel-id
+credentials-file: /etc/cloudflared/cert.pem
+
+# Ingress rules / Giriş kuralları
+ingress:
+  # Ghost main site / Ghost ana site
+  - hostname: your-domain.com
+    service: http://ghost:2368
+    
+  # Ghost admin panel / Ghost yönetim paneli
+  - hostname: admin.your-domain.com
+    service: http://ghost:2368
+    path: /ghost/*
+    
+  # Catch-all rule / Genel kural
+  - service: http_status:404

@@ -12,13 +12,19 @@ Bu proje Ghost blog platformunu Docker ile local development ve production ortam
 
 ## Özellikler
 
-- 🐳 Multi-stage Dockerfile (development ve production)
-- 🗄️ MySQL veritabanı entegrasyonu
-- 🔒 Nginx reverse proxy ile SSL desteği
-- 📧 E-posta konfigürasyonu
-- 🔧 Development ve production ortamları için ayrı konfigürasyonlar
-- 📊 Adminer ile veritabanı yönetimi (development)
-- 🚀 Production-ready konfigürasyon
+- 🐳 **Resmi Ghost Docker image** (Alpine tabanlı)
+- 🗄️ **MySQL veritabanı entegrasyonu**
+- � **Çoklu reverse proxy seçenekleri:**
+  - 🔧 **Nginx** - Geleneksel kurulum, manuel SSL
+  - 🎨 **Nginx Proxy Manager** - GUI tabanlı yönetim
+  - ⚡ **Traefik** - Modern bulut-native proxy
+  - ☁️ **Cloudflare Tunnel** - Sıfır-config güvenli tünel
+  - 🚀 **Caddy** - Basit otomatik HTTPS
+- 📧 **E-posta konfigürasyon desteği**
+- 🔧 **Development ve production için ayrı konfigürasyonlar**
+- 📊 **Adminer ile veritabanı yönetimi (development)**
+- 🛡️ **Güvenlik başlıkları ve hız sınırlama**
+- � **Proxy çözümleri arası kolay geçiş**
 
 ## Hızlı Başlangıç
 
