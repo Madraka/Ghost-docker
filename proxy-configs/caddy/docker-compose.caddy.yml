@@ -68,7 +68,7 @@ services:
       - MYSQL_PASSWORD=${DB_PASSWORD}
     volumes:
       - mysql_data:/var/lib/mysql
-      - ../mysql/my.cnf:/etc/mysql/conf.d/custom.cnf:ro
+      - ../../mysql/my.cnf:/etc/mysql/conf.d/custom.cnf:ro
     networks:
       - ghost-network
     healthcheck:
