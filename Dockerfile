@@ -1,5 +1,5 @@
 # Ghost Dockerfile
-FROM ghost:5-alpine
+FROM ghost:alpine
 
 # Set environment variables
 ENV NODE_ENV=development
