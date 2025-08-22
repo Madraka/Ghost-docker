@@ -26,7 +26,7 @@ services:
       - mail__from=${MAIL_FROM}
     volumes:
       - ghost_content:/var/lib/ghost/content
-      - ./config.production.json:/var/lib/ghost/config.production.json:ro
+      - ../../config.production.json:/var/lib/ghost/config.production.json:ro
     depends_on:
       mysql:
         condition: service_healthy
@@ -74,8 +74,8 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
       - ghost_content:/var/www/ghost/content:ro
     depends_on:
       - ghost

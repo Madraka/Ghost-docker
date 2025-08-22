@@ -35,12 +35,8 @@
     @admin {
         path /ghost/*
     }
-    rate_limit @admin {
-        zone admin
-        key {remote}
-        events 30
-        window 1m
-    }
+    # Rate limiting removed - not available in standard Caddy
+    # Rate limit direktifi kaldırıldı - standart Caddy'de mevcut değil
 }
 
 # Admin subdomain (optional) / Yönetici alt domaini (isteğe bağlı)

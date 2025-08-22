@@ -43,7 +43,7 @@ services:
       - mail__from=${MAIL_FROM}
     volumes:
       - ghost_content:/var/lib/ghost/content
-      - ../config.production.json:/var/lib/ghost/config.production.json:ro
+      - ../../config.production.json:/var/lib/ghost/config.production.json:ro
     depends_on:
       mysql:
         condition: service_healthy
