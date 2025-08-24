@@ -46,7 +46,7 @@ services:
 
   # Ghost Blog Service / Ghost Blog Servisi
   ghost:
-    image: ghost:5-alpine
+    image: ghost:${GHOST_VERSION:-alpine}
     container_name: ghost-prod
     environment:
       - NODE_ENV=production

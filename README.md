@@ -198,6 +198,142 @@ docker-compose -f docker-compose.prod.yml down
 docker-compose -f docker-compose.prod.yml exec mysql mysqldump -u ghost -p ghost_production > backup.sql
 ```
 
+## 🔄 Ghost Version Management
+
+This setup provides dynamic Ghost version control through environment variables, allowing you to easily upgrade or downgrade Ghost versions without editing multiple docker-compose files.
+
+### How It Works
+
+All docker-compose files use the `GHOST_VERSION` environment variable:
+```yaml
+services:
+  ghost:
+    image: ghost:${GHOST_VERSION:-alpine}
+```
+
+The `:-alpine` provides a default value if `GHOST_VERSION` is not set.
+
+### Available Ghost Versions
+
+You can use any official Ghost Docker tag:
+
+| Version | Tag | Description |
+|---------|-----|-------------|
+| **Latest Stable** | `alpine` | Always latest stable (auto-updates) |
+| **Version 5** | `5-alpine` | Latest version 5.x |
+| **Specific Version** | `5.87.0-alpine` | Exact version (recommended for production) |
+| **Version 4** | `4-alpine` | Latest version 4.x (legacy) |
+
+### Setting Ghost Version
+
+#### Method 1: Environment File (.env)
+
+Set `GHOST_VERSION` in your `.env` file:
+
+```bash
+# For latest stable version
+GHOST_VERSION=alpine
+
+# For specific version (recommended for production)
+GHOST_VERSION=5.87.0-alpine
+
+# For version 5.x latest
+GHOST_VERSION=5-alpine
+```
+
+#### Method 2: Command Line
+
+```bash
+# Set version for current session
+export GHOST_VERSION=5.87.0-alpine
+
+# Start with specific version
+GHOST_VERSION=5.87.0-alpine docker-compose -f docker-compose.prod.yml up -d
+```
+
+### Upgrade/Downgrade Process
+
+#### Development Environment
+```bash
+# 1. Stop current containers
+docker-compose -f docker-compose.dev.yml down
+
+# 2. Update GHOST_VERSION in .env file
+echo "GHOST_VERSION=5.87.0-alpine" >> .env
+
+# 3. Pull new image
+docker pull ghost:5.87.0-alpine
+
+# 4. Start with new version
+docker-compose -f docker-compose.dev.yml up -d
+```
+
+#### Production Environment
+```bash
+# 1. Create backup first (important!)
+docker-compose -f docker-compose.prod.yml exec mysql mysqldump -u ghost -p ghost_production > backup_before_upgrade.sql
+
+# 2. Stop containers
+docker-compose -f docker-compose.prod.yml down
+
+# 3. Update GHOST_VERSION in .env file
+nano .env  # Edit GHOST_VERSION=new-version-here
+
+# 4. Pull new image
+docker pull ghost:new-version-here
+
+# 5. Start with new version
+docker-compose -f docker-compose.prod.yml up -d
+
+# 6. Check logs for any issues
+docker-compose -f docker-compose.prod.yml logs -f ghost
+```
+
+#### Proxy Configurations
+For proxy setups, update the `.env` file in the respective proxy directory:
+```bash
+# Example: Nginx Proxy Manager
+cd proxy-configs/nginx-proxy-manager
+nano .env  # Update GHOST_VERSION
+docker-compose -f docker-compose.npm.yml down
+docker-compose -f docker-compose.npm.yml up -d
+```
+
+### Version Recommendations
+
+| Environment | Recommended | Reason |
+|------------|------------|---------|
+| **Development** | `alpine` | Always latest features for testing |
+| **Staging** | `5-alpine` | Latest stable for pre-production testing |
+| **Production** | `5.87.0-alpine` | Specific version for maximum stability |
+
+### Data Safety
+
+Your content is always preserved during version changes because:
+- ✅ **Content in Docker volumes** - Survives container recreation
+- ✅ **Database separate** - Independent of Ghost updates
+- ✅ **Automatic migrations** - Ghost handles database schema updates
+
+### Rollback Process
+
+If an upgrade causes issues:
+```bash
+# 1. Stop containers
+docker-compose down
+
+# 2. Restore previous version in .env
+GHOST_VERSION=previous-version
+
+# 3. Restore database backup if needed
+docker-compose exec -i mysql mysql -u ghost -p ghost_production < backup_before_upgrade.sql
+
+# 4. Start with previous version
+docker-compose up -d
+```
+
+## Database Backup
+```
+
 ## SSL Certificate Setup
 
 Production environment requires SSL certificates. You can use Let's Encrypt:

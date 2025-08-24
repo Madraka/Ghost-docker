@@ -12,10 +12,10 @@
 
 services:
   # Ghost Blog Service / Ghost Blog Servisi
-  # Uses fixed version for production stability - see README for update instructions
-  # Production kararlılığı için sabit versiyon kullanır - güncelleme talimatları için README'ye bakın
+  # Version controlled by GHOST_VERSION environment variable
+  # Versiyon GHOST_VERSION çevre değişkeni ile kontrol edilir
   ghost:
-    image: ghost:alpine
+    image: ghost:${GHOST_VERSION:-alpine}
     container_name: ghost-prod
     ports:
       - "2368:2368"

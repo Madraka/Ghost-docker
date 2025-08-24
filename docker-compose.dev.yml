@@ -7,10 +7,10 @@
 
 services:
   # Ghost Blog Service / Ghost Blog Servisi
-  # Uses fixed version for stability - change to ghost:alpine for auto-updates
-  # Kararlılık için sabit versiyon kullanır - otomatik güncellemeler için ghost:alpine yapın
+  # Version controlled by GHOST_VERSION environment variable
+  # Versiyon GHOST_VERSION çevre değişkeni ile kontrol edilir
   ghost-dev:
-    image: ghost:alpine
+    image: ghost:${GHOST_VERSION:-alpine}
     container_name: ghost-dev
     ports:
       - "2368:2368"

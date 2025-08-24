@@ -47,6 +47,40 @@ echo "1) Development (Local development / Yerel geliştirme)"
 echo "2) Production (Live environment / Canlı ortam)"
 read -p "Make your choice (1-2) / Seçiminizi yapın (1-2): " choice
 
+# Ghost version selection / Ghost versiyon seçimi
+echo ""
+echo "Which Ghost version would you like to use? / Hangi Ghost versiyonunu kullanmak istiyorsunuz?"
+echo "1) Latest stable (alpine) - Recommended for development / En son kararlı versiyon - Development için önerilen"
+echo "2) Ghost 5.x latest (5-alpine) - Recommended for staging / Ghost 5.x en son - Staging için önerilen"
+echo "3) Specific version (e.g., 5.87.0-alpine) - Recommended for production / Belirli versiyon - Production için önerilen"
+echo "4) Custom version / Özel versiyon"
+read -p "Make your choice (1-4) / Seçiminizi yapın (1-4): " version_choice
+
+case $version_choice in
+    1)
+        GHOST_VERSION="alpine"
+        echo "Selected: Latest stable version / Seçilen: En son kararlı versiyon"
+        ;;
+    2)
+        GHOST_VERSION="5-alpine"
+        echo "Selected: Ghost 5.x latest / Seçilen: Ghost 5.x en son"
+        ;;
+    3)
+        GHOST_VERSION="5.87.0-alpine"
+        echo "Selected: Ghost 5.87.0 (stable production version) / Seçilen: Ghost 5.87.0 (kararlı production versiyonu)"
+        ;;
+    4)
+        read -p "Enter Ghost version (e.g., 5.85.0-alpine): / Ghost versiyonunu girin (örn: 5.85.0-alpine): " GHOST_VERSION
+        echo "Selected: $GHOST_VERSION"
+        ;;
+    *)
+        echo "Invalid choice, using latest stable / Geçersiz seçim, en son kararlı versiyon kullanılıyor"
+        GHOST_VERSION="alpine"
+        ;;
+esac
+
+export GHOST_VERSION
+
 # Proxy selection for production / Production için proxy seçimi
 if [ "$choice" = "2" ]; then
     echo ""
@@ -63,6 +97,22 @@ fi
 case $choice in
     1)
         echo "🔧 Development environment starting... / Development ortamı kuruluyor..."
+        
+        # Create .env file for development if not exists
+        if [ ! -f .env ]; then
+            cp .env.dev.example .env
+            # Update GHOST_VERSION in .env file
+            echo "GHOST_VERSION=$GHOST_VERSION" >> .env
+            print_success ".env file created with Ghost version $GHOST_VERSION"
+        else
+            # Update existing .env file with new Ghost version
+            if grep -q "GHOST_VERSION=" .env; then
+                sed -i.bak "s/GHOST_VERSION=.*/GHOST_VERSION=$GHOST_VERSION/" .env
+            else
+                echo "GHOST_VERSION=$GHOST_VERSION" >> .env
+            fi
+            print_success "Ghost version updated to $GHOST_VERSION in .env file"
+        fi
         
         # Start development environment / Development ortamını başlat
         docker-compose -f docker-compose.dev.yml up -d
@@ -85,6 +135,21 @@ case $choice in
         case $proxy_choice in
             1)
                 echo "Setting up Ghost without proxy... / Proxy olmadan Ghost kuruluyor..."
+                # Create .env file for production if not exists
+                if [ ! -f .env ]; then
+                    cp .env.example .env
+                    # Update GHOST_VERSION in .env file
+                    echo "GHOST_VERSION=$GHOST_VERSION" >> .env
+                    print_success ".env file created with Ghost version $GHOST_VERSION"
+                else
+                    # Update existing .env file with new Ghost version
+                    if grep -q "GHOST_VERSION=" .env; then
+                        sed -i.bak "s/GHOST_VERSION=.*/GHOST_VERSION=$GHOST_VERSION/" .env
+                    else
+                        echo "GHOST_VERSION=$GHOST_VERSION" >> .env
+                    fi
+                    print_success "Ghost version updated to $GHOST_VERSION in .env file"
+                fi
                 # Use basic production setup / Temel production kurulumu kullan
                 docker-compose -f docker-compose.prod.yml up -d
                 print_success "Ghost is running on port 2368 / Ghost 2368 portunda çalışıyor"
@@ -97,6 +162,12 @@ case $choice in
                     cp .env.example .env
                     print_warning "Please edit proxy-configs/nginx/.env file / Lütfen proxy-configs/nginx/.env dosyasını düzenleyin"
                 fi
+                # Update GHOST_VERSION in proxy .env file
+                if grep -q "GHOST_VERSION=" .env; then
+                    sed -i.bak "s/GHOST_VERSION=.*/GHOST_VERSION=$GHOST_VERSION/" .env
+                else
+                    echo "GHOST_VERSION=$GHOST_VERSION" >> .env
+                fi
                 docker-compose -f docker-compose.nginx.yml up -d
                 cd ../..
                 print_success "Ghost with Nginx is ready! / Nginx ile Ghost hazır!"
@@ -108,6 +179,12 @@ case $choice in
                 if [ ! -f .env ]; then
                     cp .env.example .env
                     print_warning "Please edit proxy-configs/nginx-proxy-manager/.env file"
+                fi
+                # Update GHOST_VERSION in proxy .env file
+                if grep -q "GHOST_VERSION=" .env; then
+                    sed -i.bak "s/GHOST_VERSION=.*/GHOST_VERSION=$GHOST_VERSION/" .env
+                else
+                    echo "GHOST_VERSION=$GHOST_VERSION" >> .env
                 fi
                 docker-compose -f docker-compose.npm.yml up -d
                 cd ../..
@@ -122,6 +199,12 @@ case $choice in
                     cp .env.example .env
                     print_warning "Please edit proxy-configs/traefik/.env file"
                 fi
+                # Update GHOST_VERSION in proxy .env file
+                if grep -q "GHOST_VERSION=" .env; then
+                    sed -i.bak "s/GHOST_VERSION=.*/GHOST_VERSION=$GHOST_VERSION/" .env
+                else
+                    echo "GHOST_VERSION=$GHOST_VERSION" >> .env
+                fi
                 docker-compose -f docker-compose.traefik.yml up -d
                 cd ../..
                 print_success "Ghost with Traefik is ready!"
@@ -135,6 +218,12 @@ case $choice in
                     cp .env.example .env
                     print_warning "Please edit proxy-configs/cloudflare-tunnel/.env file with your tunnel token"
                 fi
+                # Update GHOST_VERSION in proxy .env file
+                if grep -q "GHOST_VERSION=" .env; then
+                    sed -i.bak "s/GHOST_VERSION=.*/GHOST_VERSION=$GHOST_VERSION/" .env
+                else
+                    echo "GHOST_VERSION=$GHOST_VERSION" >> .env
+                fi
                 docker-compose -f docker-compose.cloudflare.yml up -d
                 cd ../..
                 print_success "Ghost with Cloudflare Tunnel is ready!"
@@ -146,6 +235,12 @@ case $choice in
                 if [ ! -f .env ]; then
                     cp .env.example .env
                     print_warning "Please edit proxy-configs/caddy/.env file"
+                fi
+                # Update GHOST_VERSION in proxy .env file
+                if grep -q "GHOST_VERSION=" .env; then
+                    sed -i.bak "s/GHOST_VERSION=.*/GHOST_VERSION=$GHOST_VERSION/" .env
+                else
+                    echo "GHOST_VERSION=$GHOST_VERSION" >> .env
                 fi
                 docker-compose -f docker-compose.caddy.yml up -d
                 cd ../..

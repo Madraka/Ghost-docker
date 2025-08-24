@@ -145,7 +145,144 @@ docker-compose -f docker-compose.prod.yml logs -f ghost
 docker-compose -f docker-compose.prod.yml down
 
 # Backup alma
+# Backup alma
 docker-compose -f docker-compose.prod.yml exec mysql mysqldump -u ghost -p ghost_production > backup.sql
+```
+
+## 🔄 Ghost Versiyon Yönetimi
+
+Bu kurulum, environment değişkenleri ile dinamik Ghost versiyon kontrolü sağlar, birden fazla docker-compose dosyasını düzenlemeden Ghost versiyonlarını kolayca yükseltme veya düşürme imkanı verir.
+
+### Nasıl Çalışır
+
+Tüm docker-compose dosyaları `GHOST_VERSION` environment değişkenini kullanır:
+```yaml
+services:
+  ghost:
+    image: ghost:${GHOST_VERSION:-alpine}
+```
+
+`:-alpine` kısmı, `GHOST_VERSION` ayarlanmamışsa varsayılan değer sağlar.
+
+### Mevcut Ghost Versiyonları
+
+Herhangi bir resmi Ghost Docker tag'ini kullanabilirsiniz:
+
+| Versiyon | Tag | Açıklama |
+|----------|-----|----------|
+| **En Son Kararlı** | `alpine` | Her zaman en son kararlı versiyon (otomatik güncellemeler) |
+| **Versiyon 5** | `5-alpine` | En son 5.x versiyonu |
+| **Belirli Versiyon** | `5.87.0-alpine` | Tam versiyon (production için önerilen) |
+| **Versiyon 4** | `4-alpine` | En son 4.x versiyonu (eski) |
+
+### Ghost Versiyonunu Ayarlama
+
+#### Yöntem 1: Environment Dosyası (.env)
+
+`.env` dosyanızda `GHOST_VERSION` ayarlayın:
+
+```bash
+# En son kararlı versiyon için
+GHOST_VERSION=alpine
+
+# Belirli versiyon için (production için önerilen)
+GHOST_VERSION=5.87.0-alpine
+
+# Versiyon 5.x en son için
+GHOST_VERSION=5-alpine
+```
+
+#### Yöntem 2: Komut Satırı
+
+```bash
+# Mevcut oturum için versiyon ayarla
+export GHOST_VERSION=5.87.0-alpine
+
+# Belirli versiyon ile başlat
+GHOST_VERSION=5.87.0-alpine docker-compose -f docker-compose.prod.yml up -d
+```
+
+### Yükseltme/Düşürme İşlemi
+
+#### Development Ortamı
+```bash
+# 1. Mevcut container'ları durdur
+docker-compose -f docker-compose.dev.yml down
+
+# 2. .env dosyasında GHOST_VERSION'ı güncelle
+echo "GHOST_VERSION=5.87.0-alpine" >> .env
+
+# 3. Yeni image'ı çek
+docker pull ghost:5.87.0-alpine
+
+# 4. Yeni versiyon ile başlat
+docker-compose -f docker-compose.dev.yml up -d
+```
+
+#### Production Ortamı
+```bash
+# 1. Önce backup al (önemli!)
+docker-compose -f docker-compose.prod.yml exec mysql mysqldump -u ghost -p ghost_production > backup_before_upgrade.sql
+
+# 2. Container'ları durdur
+docker-compose -f docker-compose.prod.yml down
+
+# 3. .env dosyasında GHOST_VERSION'ı güncelle
+nano .env  # GHOST_VERSION=yeni-versiyon-buraya düzenle
+
+# 4. Yeni image'ı çek
+docker pull ghost:yeni-versiyon-buraya
+
+# 5. Yeni versiyon ile başlat
+docker-compose -f docker-compose.prod.yml up -d
+
+# 6. Herhangi bir sorun için logları kontrol et
+docker-compose -f docker-compose.prod.yml logs -f ghost
+```
+
+#### Proxy Konfigürasyonları
+Proxy kurulumları için, ilgili proxy dizinindeki `.env` dosyasını güncelleyin:
+```bash
+# Örnek: Nginx Proxy Manager
+cd proxy-configs/nginx-proxy-manager
+nano .env  # GHOST_VERSION'ı güncelle
+docker-compose -f docker-compose.npm.yml down
+docker-compose -f docker-compose.npm.yml up -d
+```
+
+### Versiyon Önerileri
+
+| Ortam | Önerilen | Sebep |
+|-------|----------|-------|
+| **Development** | `alpine` | Test için her zaman en son özellikler |
+| **Staging** | `5-alpine` | Pre-production test için en son kararlı |
+| **Production** | `5.87.0-alpine` | Maksimum kararlılık için belirli versiyon |
+
+### Veri Güvenliği
+
+Versiyon değişiklikleri sırasında içeriğiniz her zaman korunur çünkü:
+- ✅ **İçerik Docker volume'larda** - Container yeniden oluşturulması sırasında saklanır
+- ✅ **Veritabanı ayrı** - Ghost güncellemelerinden bağımsız
+- ✅ **Otomatik migration'lar** - Ghost veritabanı şema güncellemelerini otomatik yapar
+
+### Geri Alma İşlemi
+
+Eğer bir yükseltme sorun çıkarırsa:
+```bash
+# 1. Container'ları durdur
+docker-compose down
+
+# 2. .env'de önceki versiyonu geri getir
+GHOST_VERSION=onceki-versiyon
+
+# 3. Gerekirse veritabanı backup'ını geri yükle
+docker-compose exec -i mysql mysql -u ghost -p ghost_production < backup_before_upgrade.sql
+
+# 4. Önceki versiyon ile başlat
+docker-compose up -d
+```
+
+## SSL Sertifika Kurulumu
 ```
 
 ## SSL Sertifikası
